@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id                String    @id @default(cuid())
+  name              String?
+  email             String    @unique
+  emailVerified     DateTime?
+  hashedPassword    String?
+  image             String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  projects          Project[]
+  sessions          Session[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id           String       @id @default(cuid())
+  title        String
+  genre        String
+  storyType    String
+  language     String
+  targetLength String
+  userId       String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storyInputs  StoryInput[]
+  synopsis     Synopsis?
+  characters   Character[]
+  scenes       Scene[]
+}
+
+model StoryInput {
+  id        String   @id @default(cuid())
+  projectId String
+  type      String   // "text" | "document" | "audio"
+  content   String?
+  fileUrl   String?
+  fileName  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Synopsis {
+  id            String   @id @default(cuid())
+  projectId     String   @unique
+  synopsis      String
+  themes        String   // JSON array stored as string
+  arcBeginning  String
+  arcConflict   String
+  arcTurning    String
+  arcResolution String
+  outputFormat  String?  // "book" | "movie" | "documentary"
+  generatedContent String? // JSON - chapters/scenes/narration
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Character {
+  id                  String   @id @default(cuid())
+  projectId           String
+  name                String
+  role                String
+  personalityDescription String
+  age                 String?
+  photoUrl            String?
+  voiceType           String?  // "ai" | "uploaded" | "narrator"
+  voiceUrl            String?
+  isAiSuggested       Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  project             Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sceneCharacters     SceneCharacter[]
+}
+
+model Scene {
+  id          String   @id @default(cuid())
+  projectId   String
+  title       String
+  description String?
+  order       Int
+  dialogue    String?  // JSON
+  environment String?
+  mood        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sceneCharacters SceneCharacter[]
+}
+
+model SceneCharacter {
+  id          String    @id @default(cuid())
+  sceneId     String
+  characterId String
+  scene       Scene     @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@unique([sceneId, characterId])
+}
