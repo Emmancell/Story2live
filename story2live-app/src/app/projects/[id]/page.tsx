@@ -35,9 +35,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   if (!project) redirect("/dashboard");
 
   const synopsis = project.synopsis;
-  const themes = synopsis ? (JSON.parse(synopsis.themes) as string[]) : [];
+  const themes = synopsis
+    ? (() => { try { return JSON.parse(synopsis.themes) as string[]; } catch { return [] as string[]; } })()
+    : [];
   const generatedContent = synopsis?.generatedContent
-    ? JSON.parse(synopsis.generatedContent)
+    ? (() => { try { return JSON.parse(synopsis.generatedContent!); } catch { return null; } })()
     : null;
 
   const formatIcon = { book: BookOpen, movie: Film, documentary: Video };

@@ -76,7 +76,7 @@ export async function POST(
   return NextResponse.json({
     synopsis: {
       ...synopsis,
-      themes: JSON.parse(synopsis.themes),
+      themes: (() => { try { return JSON.parse(synopsis.themes); } catch { return []; } })(),
     },
     suggestedCharacters: result.suggestedCharacters,
   });
@@ -106,6 +106,11 @@ export async function GET(
   }
 
   return NextResponse.json({
-    synopsis: { ...synopsis, themes: JSON.parse(synopsis.themes) },
+    synopsis: {
+      ...synopsis,
+      themes: (() => {
+        try { return JSON.parse(synopsis.themes); } catch { return []; }
+      })(),
+    },
   });
 }

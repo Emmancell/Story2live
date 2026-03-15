@@ -66,6 +66,8 @@ export async function POST(
 
   return NextResponse.json({
     synopsis: { ...synopsis, themes: JSON.parse(synopsis.themes) },
-    generatedContent: JSON.parse(generatedContent),
+    generatedContent: (() => {
+      try { return JSON.parse(generatedContent); } catch { return {}; }
+    })(),
   });
 }
