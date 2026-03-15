@@ -1,4 +1,4 @@
-# Story2Live App
+# Story2Life App
 
 An AI-powered platform that transforms your personal life stories into books, movies, or documentaries.
 
